@@ -10,6 +10,7 @@ project(fortchem
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(set_options)
+include(install_prefix)
 
 add_library(fortchem)
 set_target_properties(fortchem PROPERTIES
@@ -22,10 +23,10 @@ target_compile_options(fortchem PRIVATE ${FCOPTS})
 add_subdirectory(src)
 
 install(TARGETS fortchem
-    ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/lib
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
 )
 
 install(DIRECTORY ${CMAKE_BINARY_DIR}/include/
-    DESTINATION ${PROJECT_SOURCE_DIR}/include
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include
     FILES_MATCHING PATTERN "*.mod"
 )
