@@ -8,32 +8,24 @@ project(fortchem
     LANGUAGES Fortran
 )
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(set_options)
 
-set(LIB_NAME fortchem)
-set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-add_library(${LIB_NAME})
-set_target_properties(${LIB_NAME} PROPERTIES
-    Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/mod
-    RUNTIME_OUTPUT_DIRECTORY ${LIB_DIR}
-    LIBRARY_OUTPUT_DIRECTORY ${LIB_DIR}
-    ARCHIVE_OUTPUT_DIRECTORY ${LIB_DIR}
+add_library(fortchem)
+set_target_properties(fortchem PROPERTIES
+    Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 
-target_compile_options(${LIB_NAME} PRIVATE ${FCOPTS})
+target_compile_options(fortchem PRIVATE ${FCOPTS})
 
 add_subdirectory(src)
 
-install(TARGETS ${LIB_NAME}
-    ARCHIVE DESTINATION ${LIB_DIR}
-    LIBRARY DESTINATION ${LIB_DIR}
-    RUNTIME DESTINATION ${LIB_DIR}
+install(TARGETS fortchem
+    ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/lib
 )
 
-install(DIRECTORY ${CMAKE_BINARY_DIR}/mod/
-    DESTINATION ${INCLUDE_DIR}
+install(DIRECTORY ${CMAKE_BINARY_DIR}/include/
+    DESTINATION ${PROJECT_SOURCE_DIR}/include
     FILES_MATCHING PATTERN "*.mod"
 )
