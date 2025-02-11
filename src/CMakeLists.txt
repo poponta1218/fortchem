@@ -9,4 +9,7 @@ set(SRC_FILES
     ${SRC_DIR}/unit_params.f90
 )
 
-target_sources(${LIB_NAME} PRIVATE ${SRC_FILES})
+target_sources(fortchem PRIVATE ${SRC_FILES})
+
+unset(SRC_DIR)
+unset(SRC_FILES)
