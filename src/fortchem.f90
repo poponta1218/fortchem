@@ -5,6 +5,11 @@ module fortchem
   use :: physchem_consts, only: pi
   use :: math_mods, only: cross_product
   implicit none
+  interface get_struc
+    procedure :: get_struc_output_ax
+    procedure :: get_struc_output_axv
+    procedure :: get_struc_output_axvfe
+  end interface get_struc
 contains
   subroutine distance(coord, atom1, atom2, dist)
     implicit none
@@ -45,7 +50,48 @@ contains
     phi = acos(dot_product(cross1, cross2) / (norm2(cross1) * norm2(cross2))) * 180.0d0 / pi
   end subroutine dihedral
 
-  subroutine get_struc(geomunit, natom, nbead, atomname, xcoord, vcoord, fcoord, epot)
+  subroutine get_struc_output_ax(geomunit, natom, nbead, atomname, xcoord)
+    implicit none
+    character(len=*), intent(out) :: atomname(:, :)
+    integer(i32), intent(in) :: geomunit, natom, nbead
+    real(dp), intent(out) :: xcoord(:, :, :)
+
+    integer(i32) :: i, iatom, ibead
+    integer(i32) :: ios
+
+    read(geomunit, '()') ! Skip the first line, which is the number of atoms
+    read(geomunit, '()') ! Skip the second line, which is the comment line (in PIMD, it is the step number)
+    do ibead=1, nbead
+      do iatom=1, natom
+        read(geomunit, *, iostat=ios) &
+            atomname(iatom, ibead), &
+            (xcoord(i, iatom, ibead), i=1, 3)
+      end do
+    end do
+  end subroutine get_struc_output_ax
+
+  subroutine get_struc_output_axv(geomunit, natom, nbead, atomname, xcoord, vcoord)
+    implicit none
+    character(len=*), intent(out) :: atomname(:, :)
+    integer(i32), intent(in) :: geomunit, natom, nbead
+    real(dp), intent(out) :: xcoord(:, :, :), vcoord(:, :, :)
+
+    integer(i32) :: i, iatom, ibead
+    integer(i32) :: ios
+
+    read(geomunit, '()') ! Skip the first line, which is the number of atoms
+    read(geomunit, '()') ! Skip the second line, which is the comment line (in PIMD, it is the step number)
+    do ibead=1, nbead
+      do iatom=1, natom
+        read(geomunit, *, iostat=ios) &
+            atomname(iatom, ibead), &
+            (xcoord(i, iatom, ibead), i=1, 3), &
+            (vcoord(i, iatom, ibead), i=1, 3)
+      end do
+    end do
+  end subroutine get_struc_output_axv
+
+  subroutine get_struc_output_axvfe(geomunit, natom, nbead, atomname, xcoord, vcoord, fcoord, epot)
     implicit none
     character(len=*), intent(out) :: atomname(:, :)
     integer(i32), intent(in) :: geomunit, natom, nbead
@@ -55,34 +101,19 @@ contains
     integer(i32) :: i, iatom, ibead
     integer(i32) :: ios
 
+    read(geomunit, '()') ! Skip the first line, which is the number of atoms
+    read(geomunit, '()') ! Skip the second line, which is the comment line (in PIMD, it is the step number)
     do ibead=1, nbead
       do iatom=1, natom
-        do while (.true.)
-          read(geomunit, *, iostat=ios) &
-              atomname(iatom, ibead), &
-              (xcoord(i, iatom, ibead), i=1, 3), &
-              (vcoord(i, iatom, ibead), i=1, 3), &
-              (fcoord(i, iatom, ibead), i=1, 3), epot
-          if (ios /= 0) then
-            read(geomunit, *, iostat=ios) &
-                atomname(iatom, ibead), &
-                (xcoord(i, iatom, ibead), i=1, 3), &
-                (vcoord(i, iatom, ibead), i=1, 3)
-            if (ios /= 0) then
-              read(geomunit, *, iostat=ios) &
-                  atomname(iatom, ibead), &
-                  (xcoord(i, iatom, ibead), i=1, 3)
-              if (ios /= 0) then
-                read(geomunit)
-              end if
-            end if
-          else
-            exit
-          end if
-        end do
+        read(geomunit, *, iostat=ios) &
+            atomname(iatom, ibead), &
+            (xcoord(i, iatom, ibead), i=1, 3), &
+            (vcoord(i, iatom, ibead), i=1, 3), &
+            (fcoord(i, iatom, ibead), i=1, 3), &
+            epot
       end do
     end do
-  end subroutine get_struc
+  end subroutine get_struc_output_axvfe
 
   subroutine centroid(coord, cent)
     implicit none
